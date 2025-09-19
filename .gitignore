@@ -1,0 +1,11 @@
+﻿bin/
+obj/
+.vs/
+*.user
+*.suo
+*.dbmdl
+*.log
+*.tlog
+*.tfstate
+*.tfstate.backup
+.terraform/

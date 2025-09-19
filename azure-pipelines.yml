@@ -1,0 +1,24 @@
+﻿trigger:
+  branches:
+    include:
+      - main
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        packageType: sdk
+        version: 8.x
+    - script: dotnet restore app/SamlApp/SamlApp.csproj
+    - script: dotnet build app/SamlApp/SamlApp.csproj --configuration Release
+    - script: dotnet test app/SamlApp.Tests/SamlApp.Tests.csproj
+    - script: dotnet publish app/SamlApp/SamlApp.csproj -c Release -o $(Build.ArtifactStagingDirectory)
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+        artifactName: drop
