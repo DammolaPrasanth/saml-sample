@@ -1,30 +1,26 @@
-﻿# azure-pipelines.yml
-# CI Pipeline for SAML Sample App
-
-trigger:
-  branches:
-    include:
-      - main   # 🚨 You can comment this out while testing
+﻿trigger:
+- main
 
 pool:
-  vmImage: 'windows-latest'   # Use Windows agent for .NET 8
+  vmImage: 'windows-latest'
 
-stages:
-- stage: Build
-  jobs:
-  - job: BuildJob
-    steps:
-    - task: UseDotNet@2
-      displayName: "Install .NET 8 SDK"
-      inputs:
-        packageType: 'sdk'
-        version: '8.0.x'
-        installationPath: $(Agent.ToolsDirectory)/dotnet
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.0.x'
 
-    - script: dotnet --version
-      displayName: "Check .NET version"
+- script: dotnet restore app/SamlApp/SamlApp.csproj
+  displayName: 'Restore NuGet packages'
 
-    - script: dotnet restore app/SamlApp/SamlApp.csproj
-      displayName: "Restore packages"
+- script: dotnet build app/SamlApp/SamlApp.csproj --configuration Release
+  displayName: 'Build project'
 
-    - script: dotnet build app/SamlApp/SamlApp.csproj --c
+- script: dotnet test app/SamlApp.Tests/SamlApp.Tests.csproj --configuration Release
+  displayName: 'Run tests'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
